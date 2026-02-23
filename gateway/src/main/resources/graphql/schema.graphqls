@@ -1,0 +1,225 @@
+# VectorFlow GraphQL Schema
+
+# ============== Queries ==============
+
+type Query {
+    """Search for documents using vector similarity"""
+    search(query: String!, limit: Int = 5, filters: FilterInput): SearchResponse!
+    
+    """Ask a question and get an AI-generated answer with sources"""
+    ask(question: String!, maxSources: Int = 5): AskResponse!
+    
+    """Get current user info"""
+    me: User
+
+    """List all users (requires ADMIN role)"""
+    users: [User!]!
+}
+
+# ============== Mutations ==============
+
+type Mutation {
+    """Ingest a new document (requires EDITOR or ADMIN role)"""
+    ingest(input: IngestInput!): IngestResponse!
+    
+    """Delete a document by ID (requires EDITOR or ADMIN role)"""
+    deleteDocument(documentId: ID!): DeleteResponse!
+    
+    """Register a new user"""
+    register(input: RegisterInput!): AuthResponse!
+    
+    """Login and get JWT token"""
+    login(input: LoginInput!): AuthResponse!
+
+    """Bulk ingest multiple documents (requires EDITOR or ADMIN role)"""
+    bulkIngest(input: BulkIngestInput!): BulkIngestResponse!
+
+    """Assign a role to a user (requires ADMIN role)"""
+    assignRole(input: AssignRoleInput!): AssignRoleResponse!
+}
+
+# ============== Input Types ==============
+
+input IngestInput {
+    """Document title"""
+    title: String!
+    
+    """Document content (text/markdown)"""
+    content: String!
+    
+    """Optional metadata for filtering"""
+    metadata: MetadataInput
+}
+
+input MetadataInput {
+    category: String
+    tags: [String!]
+}
+
+input FilterInput {
+    category: String
+    tags: [String!]
+}
+
+input RegisterInput {
+    email: String!
+    password: String!
+}
+
+input LoginInput {
+    email: String!
+    password: String!
+}
+
+input BulkIngestInput {
+    """List of documents to ingest"""
+    documents: [IngestInput!]!
+}
+
+input AssignRoleInput {
+    """User ID (UUID) to update"""
+    userId: ID!
+    """Target role: VIEWER, EDITOR, or ADMIN"""
+    role: String!
+}
+
+# ============== Response Types ==============
+
+type SearchResponse {
+    """List of search results"""
+    results: [SearchResult!]!
+    
+    """Total count of results"""
+    totalCount: Int!
+    
+    """Original query"""
+    query: String!
+}
+
+type SearchResult {
+    """Unique result ID"""
+    id: ID!
+    
+    """Parent document ID"""
+    documentId: ID!
+    
+    """Document title"""
+    title: String!
+    
+    """Text snippet"""
+    snippet: String!
+    
+    """Similarity score (0-1)"""
+    score: Float!
+    
+    """Document metadata"""
+    metadata: Metadata
+}
+
+type AskResponse {
+    """AI-generated answer"""
+    answer: String!
+    
+    """Source documents used"""
+    sources: [Source!]!
+    
+    """Confidence score (0-1)"""
+    confidence: Float!
+    
+    """Original question"""
+    question: String!
+}
+
+type Source {
+    """Document ID"""
+    documentId: ID!
+    
+    """Document title"""
+    title: String!
+    
+    """Relevant snippet"""
+    snippet: String!
+    
+    """Relevance score"""
+    relevance: Float!
+}
+
+type IngestResponse {
+    """Generated document ID"""
+    documentId: ID!
+    
+    """Document title"""
+    title: String!
+    
+    """Number of chunks created"""
+    chunkCount: Int!
+    
+    """Processing status"""
+    status: DocumentStatus!
+    
+    """Status message"""
+    message: String!
+}
+
+type DeleteResponse {
+    """Whether deletion was successful"""
+    success: Boolean!
+    
+    """Status message"""
+    message: String!
+}
+
+type AuthResponse {
+    """JWT access token"""
+    token: String!
+    
+    """User information"""
+    user: User!
+}
+
+type User {
+    id: ID!
+    email: String!
+    role: String!
+    createdAt: String!
+}
+
+type BulkIngestResponse {
+    """Total documents submitted"""
+    total: Int!
+    """Number successfully ingested"""
+    successful: Int!
+    """Number that failed"""
+    failed: Int!
+    """Individual results for each document"""
+    results: [IngestResponse!]!
+}
+
+type AssignRoleResponse {
+    """Whether the role assignment was successful"""
+    success: Boolean!
+    """Status message"""
+    message: String!
+    """Updated user"""
+    user: User!
+}
+
+type Metadata {
+    category: String
+    tags: [String!]
+}
+
+# ============== Enums ==============
+
+enum DocumentStatus {
+    PROCESSING
+    COMPLETED
+    FAILED
+}
+
+enum UserRole {
+    VIEWER
+    EDITOR
+    ADMIN
+}
+

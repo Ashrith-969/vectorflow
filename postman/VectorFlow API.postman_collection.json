@@ -1,0 +1,558 @@
+{
+	"info": {
+		"_postman_id": "811120b9-509a-48bc-81d3-44bbc14f4cb0",
+		"name": "VectorFlow API",
+		"description": "GraphQL API collection for VectorFlow - Distributed Vector Search & LLM-Orchestrated Retrieval Engine",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "32755530"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Register($input: RegisterInput!) {\n  register(input: $input) {\n    token\n    user {\n      id\n      email\n      createdAt\n    }\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"email\": \"demo@vectorflow.dev\",\n    \"password\": \"password123\"\n  }\n}"
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.login) {",
+									"    pm.collectionVariables.set('token', jsonData.data.login.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Login($input: LoginInput!) {\n  login(input: $input) {\n    token\n    user {\n      id\n      email\n      createdAt\n    }\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"email\": \"test@vectorflow.dev\",\n    \"password\": \"password123\"\n  }\n}"
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Me {\n  me {\n    id\n    email\n    createdAt\n  }\n}",
+								"variables": ""
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Document Ingestion",
+			"item": [
+				{
+					"name": "Ingest Qdrant Documentation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Ingest($input: IngestInput!) {\n  ingest(input: $input) {\n    documentId\n    title\n    chunkCount\n    status\n    message\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"title\": \"Qdrant Vector Database Basics\",\n    \"content\": \"Qdrant is a vector similarity search engine and vector database. It provides a production-ready service with a convenient API to store, search, and manage points—vectors with an additional payload. A collection is a named set of points among which you can search. All vectors within a collection must have the same dimensionality. Points are the central entity in Qdrant, consisting of an ID, vector, and optional payload. Payloads are arbitrary JSON objects attached to points for metadata and filtering. Vector similarity search finds the most similar vectors to a query vector using distance metrics like Cosine, Euclidean, or Dot Product.\",\n    \"metadata\": {\n      \"category\": \"database\",\n      \"tags\": [\"vector\", \"search\", \"qdrant\"]\n    }\n  }\n}"
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				},
+				{
+					"name": "Ingest FastAPI Documentation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Ingest($input: IngestInput!) {\n  ingest(input: $input) {\n    documentId\n    title\n    chunkCount\n    status\n    message\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"title\": \"FastAPI Framework Guide\",\n    \"content\": \"FastAPI is a modern, fast web framework for building APIs with Python 3.7+ based on standard Python type hints. It automatically generates interactive API documentation with Swagger UI and ReDoc. FastAPI uses Pydantic models for automatic request validation and serialization. It supports async/await natively and has a powerful dependency injection system. Path operations handle HTTP requests with decorators like @app.get, @app.post. Query parameters are automatically parsed from the URL. Use APIRouter to organize your API into modules.\",\n    \"metadata\": {\n      \"category\": \"framework\",\n      \"tags\": [\"python\", \"api\", \"fastapi\"]\n    }\n  }\n}"
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				},
+				{
+					"name": "Ingest Docker Documentation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation Ingest($input: IngestInput!) {\n  ingest(input: $input) {\n    documentId\n    title\n    chunkCount\n    status\n    message\n  }\n}",
+								"variables": "{\n  \"input\": {\n    \"title\": \"Docker Containerization Fundamentals\",\n    \"content\": \"Docker is a platform for developing, shipping, and running applications in containers. Containers are lightweight, standalone, executable packages that include everything needed to run an application. Docker images are read-only templates built from Dockerfiles. Containers are runnable instances of images. Docker Compose is a tool for defining and running multi-container applications using docker-compose.yml files. Volumes provide data persistence for containers. Networks enable container communication.\",\n    \"metadata\": {\n      \"category\": \"devops\",\n      \"tags\": [\"docker\", \"containers\", \"deployment\"]\n    }\n  }\n}"
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Document",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation DeleteDocument($documentId: ID!) {\n  deleteDocument(documentId: $documentId) {\n    success\n    message\n  }\n}",
+								"variables": "{\n  \"documentId\": \"YOUR_DOCUMENT_ID_HERE\"\n}"
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk-Ingest",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"documents\": [\n    {\n      \"title\": \"Amazon Web Services (AWS) Cloud Computing Fundamentals\",\n      \"content\": \"Amazon Web Services (AWS) is the world leading cloud computing platform, offering over 200 fully featured services from data centers globally. AWS provides Infrastructure as a Service (IaaS), Platform as a Service (PaaS), and Software as a Service (SaaS) solutions. The core compute service, Amazon EC2, allows users to rent virtual servers with configurable CPU, memory, storage, and networking capacity. EC2 instances can be launched in multiple Availability Zones for high availability and fault tolerance. AWS Lambda enables serverless computing, allowing developers to run code without provisioning servers, paying only for compute time consumed. Amazon S3 provides virtually unlimited object storage with 99.999999999% durability, supporting data lakes, backups, and static website hosting. The AWS Virtual Private Cloud (VPC) enables users to create isolated network environments with complete control over IP addressing, subnets, route tables, and security groups. AWS also offers managed database services including Amazon RDS for relational databases, DynamoDB for NoSQL, and ElastiCache for in-memory caching. Identity and Access Management (IAM) provides fine-grained access control with users, roles, and policies. CloudWatch monitors resources and applications, while CloudTrail logs API calls for audit and compliance. AWS has transformed how organizations build and deploy applications, enabling rapid scaling and global reach.\",\n      \"metadata\": {\"category\": \"cloud\", \"tags\": [\"aws\", \"cloud-computing\", \"infrastructure\"]}\n    },\n    {\n      \"title\": \"Google Cloud Platform (GCP) Architecture and Services\",\n      \"content\": \"Google Cloud Platform (GCP) is Google enterprise cloud computing service, leveraging the same infrastructure that powers Google Search, YouTube, and Gmail. GCP operates across 35 regions and 106 zones worldwide, connected by Google private fiber network spanning over 100,000 miles. Compute Engine provides scalable virtual machines with custom machine types, allowing precise CPU and memory configuration. Google Kubernetes Engine (GKE) offers managed Kubernetes clusters, making container orchestration accessible with automatic scaling, updates, and self-healing. Cloud Functions enables event-driven serverless computing, integrating seamlessly with other GCP services. BigQuery is a fully managed, serverless data warehouse that enables super-fast SQL queries using the processing power of Google infrastructure, capable of scanning terabytes in seconds. Cloud Spanner provides globally distributed, horizontally scalable relational database with strong consistency and five-nines availability. Google commitment to sustainability means GCP runs on 100% renewable energy, with carbon-neutral operations since 2007. Cloud AI and Machine Learning services include pre-trained APIs for vision, speech, and natural language processing, plus custom model training with Vertex AI. Cloud Storage offers unified object storage with multiple storage classes optimized for different access patterns. GCP emphasis on open-source technologies and multi-cloud support through Anthos distinguishes it in the cloud market.\",\n      \"metadata\": {\"category\": \"cloud\", \"tags\": [\"gcp\", \"google-cloud\", \"infrastructure\"]}\n    },\n    {\n      \"title\": \"Global Secondary Indexes (GSI) in Database Systems\",\n      \"content\": \"Global Secondary Indexes (GSI) are powerful database constructs that enable efficient querying on non-primary key attributes. In Amazon DynamoDB, GSIs create a completely separate index with its own partition key and optional sort key, independent of the base table structure. Unlike Local Secondary Indexes (LSIs), GSIs can be created or deleted at any time after table creation and have their own provisioned throughput settings. When a GSI is created, DynamoDB automatically propagates changes from the base table to the index, maintaining eventual consistency. GSIs support sparse indexes where only items containing the indexed attribute are included, reducing storage costs and improving query performance for specific access patterns. The projection attribute determines which attributes are copied to the index: KEYS_ONLY includes just keys, INCLUDE specifies particular attributes, and ALL copies everything. Query operations on GSIs are highly efficient, using partition key equality and optional sort key conditions to retrieve data without scanning the entire table. However, GSIs consume additional write capacity when base table items are modified, as DynamoDB must update both structures. Best practices include designing GSIs based on access patterns, avoiding over-indexing which increases costs, and considering read/write ratios when provisioning throughput. GSIs enable the single-table design pattern popular in DynamoDB, where related entities share a table but are accessed through different index configurations. Understanding GSI behavior is crucial for building scalable, cost-effective NoSQL applications.\",\n      \"metadata\": {\"category\": \"database\", \"tags\": [\"gsi\", \"dynamodb\", \"indexing\", \"nosql\"]}\n    },\n    {\n      \"title\": \"B-Trees and B+ Trees Data Structure Fundamentals\",\n      \"content\": \"B-Trees are self-balancing tree data structures that maintain sorted data and allow searches, sequential access, insertions, and deletions in logarithmic time. Invented by Rudolf Bayer and Edward McCreight in 1970, B-Trees are optimized for systems that read and write large blocks of data, making them ideal for databases and file systems. A B-Tree of order m has nodes containing at most m-1 keys and m children, with all leaves at the same depth ensuring balanced operations. The minimum degree t determines the minimum number of keys in non-root nodes, typically chosen based on disk block size to minimize I/O operations. B+ Trees, a variant widely used in database indexes, store all data in leaf nodes while internal nodes contain only keys for navigation. Leaf nodes in B+ Trees are linked together, enabling efficient range queries and sequential scans without traversing internal nodes. When inserting into a full node, the tree splits the node and promotes the middle key to the parent, potentially cascading splits to the root. Deletion may require node merging or key redistribution to maintain minimum occupancy constraints. B-Trees excel at disk-based storage because their high branching factor minimizes tree height, reducing disk seeks. Modern databases like PostgreSQL and MySQL use B+ Tree variants for their primary indexes. The time complexity for search, insert, and delete operations is O(log n), with the base of the logarithm being the branching factor rather than 2.\",\n      \"metadata\": {\"category\": \"data-structures\", \"tags\": [\"btree\", \"indexing\", \"algorithms\", \"database\"]}\n    },\n    {\n      \"title\": \"Microservices Architecture Design Patterns and Best Practices\",\n      \"content\": \"Microservices architecture decomposes applications into small, independently deployable services that communicate through well-defined APIs. Each microservice owns its data and business logic, enabling teams to develop, deploy, and scale services independently. The single responsibility principle guides service boundaries, with each microservice handling one specific business capability. Inter-service communication typically uses synchronous REST or gRPC for request-response patterns, and asynchronous messaging with Apache Kafka or RabbitMQ for event-driven interactions. The API Gateway pattern provides a single entry point for clients, handling cross-cutting concerns like authentication, rate limiting, and request routing. Service discovery mechanisms like Consul or Kubernetes DNS enable services to locate each other dynamically without hardcoded endpoints. The Circuit Breaker pattern prevents cascade failures by detecting failing services and failing fast, allowing systems to degrade gracefully. Saga pattern manages distributed transactions across services, using choreography or orchestration to maintain data consistency without distributed locks. Each microservice should have its own database, following the database-per-service pattern to ensure loose coupling. Containerization with Docker packages services with dependencies, while Kubernetes orchestrates deployment, scaling, and management. Observability through distributed tracing with Jaeger, centralized logging with ELK stack, and metrics with Prometheus provides visibility into system behavior. Challenges include increased operational complexity, network latency, and the need for robust DevOps practices. Successful microservices adoption requires organizational alignment with Conway Law, where team structures mirror system architecture.\",\n      \"metadata\": {\"category\": \"architecture\", \"tags\": [\"microservices\", \"distributed-systems\", \"design-patterns\"]}\n    },\n    {\n      \"title\": \"Load Balancing Strategies and Algorithms in Distributed Systems\",\n      \"content\": \"Load balancing distributes incoming network traffic across multiple servers to ensure no single server bears excessive load, improving application availability and responsiveness. Hardware load balancers like F5 BIG-IP provide high performance but are expensive, while software solutions like HAProxy, Nginx, and cloud-native options offer flexibility and cost-effectiveness. Layer 4 load balancers operate at the transport layer, making routing decisions based on IP addresses and TCP/UDP ports without inspecting packet contents. Layer 7 load balancers work at the application layer, enabling content-based routing using HTTP headers, cookies, or URL paths. Round-robin algorithm distributes requests sequentially across servers, simple but ignoring server capacity differences. Weighted round-robin assigns proportional traffic based on server capabilities, sending more requests to powerful machines. Least connections algorithm routes to the server with fewest active connections, effective for varying request durations. IP hash ensures requests from the same client IP always reach the same server, maintaining session affinity without sticky sessions. Health checks continuously monitor backend servers, automatically removing unhealthy instances from rotation. Global server load balancing (GSLB) distributes traffic across geographically distributed data centers based on latency, geography, or server health. Cloud providers offer managed load balancers: AWS Application Load Balancer, Google Cloud Load Balancing, and Azure Load Balancer. Modern approaches include service mesh load balancing with Istio or Linkerd, providing fine-grained traffic control at the microservice level. Proper load balancing is essential for achieving high availability, horizontal scaling, and optimal resource utilization in distributed systems.\",\n      \"metadata\": {\"category\": \"infrastructure\", \"tags\": [\"load-balancer\", \"distributed-systems\", \"networking\", \"scalability\"]}\n    },\n    {\n      \"title\": \"Deep Learning Neural Networks Architecture and Training\",\n      \"content\": \"Deep learning is a subset of machine learning using artificial neural networks with multiple layers to progressively extract higher-level features from raw input. Neural networks consist of interconnected nodes organized in layers: input layer receives data, hidden layers perform transformations, and output layer produces predictions. Each connection has a weight that is adjusted during training through backpropagation, which calculates gradients of the loss function with respect to weights. Convolutional Neural Networks (CNNs) excel at image processing, using convolutional layers to detect spatial hierarchies of features like edges, textures, and objects. Recurrent Neural Networks (RNNs) process sequential data, maintaining hidden state that captures information from previous time steps. Long Short-Term Memory (LSTM) and Gated Recurrent Units (GRU) address the vanishing gradient problem in standard RNNs, enabling learning of long-range dependencies. Transformers revolutionized natural language processing with self-attention mechanisms, powering models like BERT, GPT, and their successors. Training deep networks requires large datasets and significant computational resources, typically using GPUs or TPUs for parallel matrix operations. Optimization algorithms like Adam, SGD with momentum, and learning rate schedulers help networks converge efficiently. Regularization techniques including dropout, batch normalization, and weight decay prevent overfitting. Transfer learning leverages pre-trained models, fine-tuning them for specific tasks with limited data. Frameworks like TensorFlow, PyTorch, and JAX provide high-level APIs for building and training networks. Deep learning has achieved superhuman performance in image recognition, natural language understanding, game playing, and protein structure prediction.\",\n      \"metadata\": {\"category\": \"machine-learning\", \"tags\": [\"deep-learning\", \"neural-networks\", \"ai\", \"machine-learning\"]}\n    },\n    {\n      \"title\": \"AWS Lambda Serverless Computing and Event-Driven Architecture\",\n      \"content\": \"AWS Lambda is a serverless compute service that runs code in response to events without requiring server provisioning or management. Functions are triggered by various AWS services including API Gateway for HTTP requests, S3 for object operations, DynamoDB Streams for database changes, and SQS for message processing. Lambda automatically scales from zero to thousands of concurrent executions, charging only for actual compute time in millisecond increments. The execution environment supports multiple runtimes including Node.js, Python, Java, Go, Ruby, and custom runtimes via Lambda Layers. Cold starts occur when Lambda creates new execution environments, adding latency that can be mitigated through provisioned concurrency or keeping functions warm. Memory allocation ranges from 128MB to 10GB, with CPU power scaling proportionally. Lambda functions have a maximum execution duration of 15 minutes, suitable for most event-driven workloads but requiring step functions for longer processes. Environment variables store configuration, while AWS Secrets Manager handles sensitive data. Lambda Layers enable sharing common code and dependencies across functions, reducing deployment package sizes. VPC integration allows functions to access private resources like RDS databases, though it adds cold start latency. Lambda@Edge runs functions at CloudFront edge locations for low-latency content customization. Best practices include keeping functions focused, minimizing cold start impact, and implementing proper error handling with dead-letter queues. Monitoring through CloudWatch provides metrics on invocations, duration, errors, and throttles. Lambda has become the foundation of serverless architectures, enabling rapid development of scalable, cost-effective applications.\",\n      \"metadata\": {\"category\": \"cloud\", \"tags\": [\"aws\", \"lambda\", \"serverless\", \"event-driven\"]}\n    },\n    {\n      \"title\": \"Kubernetes Container Orchestration and Cluster Management\",\n      \"content\": \"Kubernetes is an open-source container orchestration platform that automates deployment, scaling, and management of containerized applications. Originally developed by Google and now maintained by the Cloud Native Computing Foundation, Kubernetes has become the industry standard for container orchestration. A Kubernetes cluster consists of a control plane managing cluster state and worker nodes running application workloads. Pods are the smallest deployable units, containing one or more containers that share network and storage resources. Deployments manage pod lifecycle, enabling declarative updates, rolling deployments, and automatic rollbacks. Services provide stable networking endpoints for pod groups, with types including ClusterIP for internal access, NodePort for external access, and LoadBalancer for cloud provider integration. ConfigMaps and Secrets externalize configuration and sensitive data from container images, enabling environment-specific deployments. Persistent Volumes and Persistent Volume Claims abstract storage provisioning, supporting stateful applications with data persistence. Horizontal Pod Autoscaler automatically adjusts replica count based on CPU utilization or custom metrics. Namespaces provide logical isolation for multi-tenant clusters, with Resource Quotas limiting compute and storage consumption. Ingress controllers manage external HTTP/HTTPS access with path-based routing, TLS termination, and virtual hosting. The scheduler assigns pods to nodes based on resource requirements, affinity rules, and constraints. Operators extend Kubernetes with custom controllers managing complex stateful applications. Helm packages Kubernetes manifests into reusable charts, simplifying application deployment. Service meshes like Istio add observability, traffic management, and security without application changes. Kubernetes transforms infrastructure into a programmable platform, enabling GitOps workflows and infrastructure as code.\",\n      \"metadata\": {\"category\": \"devops\", \"tags\": [\"kubernetes\", \"containers\", \"orchestration\", \"cloud-native\"]}\n    },\n    {\n      \"title\": \"Convolutional Neural Networks for Computer Vision Applications\",\n      \"content\": \"Convolutional Neural Networks (CNNs) are specialized deep learning architectures designed for processing structured grid data like images, achieving remarkable success in computer vision tasks. The fundamental building block is the convolutional layer, which applies learnable filters across the input, detecting local patterns regardless of their position through parameter sharing. Each filter produces a feature map highlighting specific patterns like edges, corners, or textures, with deeper layers capturing increasingly abstract features. Pooling layers reduce spatial dimensions through max pooling or average pooling, providing translation invariance and reducing computational requirements. The receptive field grows with network depth, allowing neurons to respond to larger image regions. Batch normalization normalizes layer inputs, accelerating training and acting as regularization. Residual connections in ResNet architectures enable training of very deep networks by allowing gradients to flow directly through skip connections. Popular architectures include VGG with uniform 3x3 convolutions, Inception with multi-scale parallel convolutions, and EfficientNet with compound scaling. Transfer learning from models pre-trained on ImageNet enables effective training with limited domain-specific data. Data augmentation techniques including rotation, flipping, cropping, and color jittering expand training sets and improve generalization. CNNs power applications including image classification, object detection with YOLO and Faster R-CNN, semantic segmentation with U-Net, and face recognition. Attention mechanisms and Vision Transformers are emerging alternatives, achieving competitive results through self-attention. CNNs have revolutionized medical imaging, autonomous vehicles, satellite imagery analysis, and countless other visual recognition applications. Understanding CNN fundamentals is essential for any deep learning practitioner working with visual data.\",\n      \"metadata\": {\"category\": \"machine-learning\", \"tags\": [\"cnn\", \"deep-learning\", \"computer-vision\", \"neural-networks\"]}\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "http://localhost:8000/api/bulk-ingest"
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": {
+					"token": "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJkZW1vQHZlY3RvcmZsb3cuZGV2IiwiaWF0IjoxNzY2MTM5NDA2LCJleHAiOjE3NjYyMjU4MDZ9.1vWs3Iw3VAPodG2ncbBPrfFTD7-jEBpatbRJtRskjPxFf8tkD_RlkEv3-pyrPFoa"
+				}
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Search",
+			"item": [
+				{
+					"name": "Basic Search",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Search($query: String!, $limit: Int) {\n  search(query: $query, limit: $limit) {\n    results {\n      id\n      documentId\n      title\n      snippet\n      score\n      metadata {\n        category\n        tags\n      }\n    }\n    totalCount\n    query\n  }\n}",
+								"variables": "{\n  \"query\": \"What is a vector database?\",\n  \"limit\": 5\n}"
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				},
+				{
+					"name": "Search with Category Filter",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Search($query: String!, $limit: Int, $filters: FilterInput) {\n  search(query: $query, limit: $limit, filters: $filters) {\n    results {\n      id\n      documentId\n      title\n      snippet\n      score\n      metadata {\n        category\n        tags\n      }\n    }\n    totalCount\n    query\n  }\n}",
+								"variables": "{\n  \"query\": \"How to create containers?\",\n  \"limit\": 5,\n  \"filters\": {\n    \"category\": \"devops\"\n  }\n}"
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				},
+				{
+					"name": "Search with Tags Filter",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Search($query: String!, $limit: Int, $filters: FilterInput) {\n  search(query: $query, limit: $limit, filters: $filters) {\n    results {\n      id\n      documentId\n      title\n      snippet\n      score\n    }\n    totalCount\n    query\n  }\n}",
+								"variables": "{\n  \"query\": \"API documentation\",\n  \"limit\": 10,\n  \"filters\": {\n    \"tags\": [\"python\", \"api\"]\n  }\n}"
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": {
+					"token": "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJkZW1vQHZlY3RvcmZsb3cuZGV2IiwiaWF0IjoxNzY2MTY5Njg5LCJleHAiOjE3NjYyNTYwODl9.Yfkr3oHQpfFm8-SMaA42g9RNg-O5S1BXwECxGiUnF6n3Ur_kV46Uv6VyaRXzjDRo"
+				}
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Ask (RAG)",
+			"item": [
+				{
+					"name": "Ask about Qdrant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Ask($question: String!, $maxSources: Int) {\n  ask(question: $question, maxSources: $maxSources) {\n    answer\n    sources {\n      documentId\n      title\n      snippet\n      relevance\n    }\n    confidence\n    question\n  }\n}",
+								"variables": "{\n  \"question\": \"What is a Qdrant collection and how do I create one?\",\n  \"maxSources\": 3\n}"
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				},
+				{
+					"name": "Ask about FastAPI",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Ask($question: String!, $maxSources: Int) {\n  ask(question: $question, maxSources: $maxSources) {\n    answer\n    sources {\n      documentId\n      title\n      snippet\n      relevance\n    }\n    confidence\n    question\n  }\n}",
+								"variables": "{\n  \"question\": \"How do I use dependency injection in FastAPI?\",\n  \"maxSources\": 3\n}"
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				},
+				{
+					"name": "Ask about Docker",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Ask($question: String!, $maxSources: Int) {\n  ask(question: $question, maxSources: $maxSources) {\n    answer\n    sources {\n      documentId\n      title\n      snippet\n      relevance\n    }\n    confidence\n    question\n  }\n}",
+								"variables": "{\n  \"question\": \"What is the difference between a Docker image and a container?\",\n  \"maxSources\": 3\n}"
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				},
+				{
+					"name": "Ask Cross-Domain Question",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Ask($question: String!, $maxSources: Int) {\n  ask(question: $question, maxSources: $maxSources) {\n    answer\n    sources {\n      documentId\n      title\n      snippet\n      relevance\n    }\n    confidence\n    question\n  }\n}",
+								"variables": "{\n  \"question\": \"How can I deploy a FastAPI application using Docker?\",\n  \"maxSources\": 5\n}"
+							}
+						},
+						"url": "{{baseUrl}}/graphql"
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": {
+					"token": "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJkZW1vQHZlY3RvcmZsb3cuZGV2IiwiaWF0IjoxNzY4MjczMjk4LCJleHAiOjE3NjgzNTk2OTh9.6Hz8577b4I8SYAzfnXd3LnJhbWR5SSd2nXwbUJJGMmz3bSDzDtakaqyMg6r6GMDh"
+				}
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Python Service Direct",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8000/health"
+					},
+					"response": []
+				},
+				{
+					"name": "Collection Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8000/api/collection/info"
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": {
+					"token": "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJkZW1vQHZlY3RvcmZsb3cuZGV2IiwiaWF0IjoxNzY2MTQwNDQzLCJleHAiOjE3NjYyMjY4NDN9.ecx893SHtG8RVdXBB7VQph1Uz7MtVg5OofSIjBlDLwZwejncJT117eRAxJXiWb2F"
+				}
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Qdrant datastore",
+			"item": [
+				{
+					"name": "Get Documents",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Documents",
+			"item": [
+				{
+					"name": "List of Documents",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Get Document",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8000/api/documents/"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": {
+			"token": "{{token}}"
+		}
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

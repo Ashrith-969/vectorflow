@@ -1,0 +1,451 @@
+{
+  "info": {
+    "name": "VectorFlow API",
+    "description": "GraphQL API collection for VectorFlow - Distributed Vector Search & LLM-Orchestrated Retrieval Engine",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation Register($input: RegisterInput!) {\n  register(input: $input) {\n    token\n    user {\n      id\n      email\n      createdAt\n    }\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"email\": \"demo@vectorflow.dev\",\n    \"password\": \"password123\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.login) {",
+                  "    pm.collectionVariables.set('token', jsonData.data.login.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation Login($input: LoginInput!) {\n  login(input: $input) {\n    token\n    user {\n      id\n      email\n      createdAt\n    }\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"email\": \"test@vectorflow.dev\",\n    \"password\": \"password123\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Me {\n  me {\n    id\n    email\n    createdAt\n  }\n}",
+                "variables": ""
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Document Ingestion",
+      "item": [
+        {
+          "name": "Ingest Qdrant Documentation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation Ingest($input: IngestInput!) {\n  ingest(input: $input) {\n    documentId\n    title\n    chunkCount\n    status\n    message\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"title\": \"Qdrant Vector Database Basics\",\n    \"content\": \"Qdrant is a vector similarity search engine and vector database. It provides a production-ready service with a convenient API to store, search, and manage points—vectors with an additional payload. A collection is a named set of points among which you can search. All vectors within a collection must have the same dimensionality. Points are the central entity in Qdrant, consisting of an ID, vector, and optional payload. Payloads are arbitrary JSON objects attached to points for metadata and filtering. Vector similarity search finds the most similar vectors to a query vector using distance metrics like Cosine, Euclidean, or Dot Product.\",\n    \"metadata\": {\n      \"category\": \"database\",\n      \"tags\": [\"vector\", \"search\", \"qdrant\"]\n    }\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ingest FastAPI Documentation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation Ingest($input: IngestInput!) {\n  ingest(input: $input) {\n    documentId\n    title\n    chunkCount\n    status\n    message\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"title\": \"FastAPI Framework Guide\",\n    \"content\": \"FastAPI is a modern, fast web framework for building APIs with Python 3.7+ based on standard Python type hints. It automatically generates interactive API documentation with Swagger UI and ReDoc. FastAPI uses Pydantic models for automatic request validation and serialization. It supports async/await natively and has a powerful dependency injection system. Path operations handle HTTP requests with decorators like @app.get, @app.post. Query parameters are automatically parsed from the URL. Use APIRouter to organize your API into modules.\",\n    \"metadata\": {\n      \"category\": \"framework\",\n      \"tags\": [\"python\", \"api\", \"fastapi\"]\n    }\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ingest Docker Documentation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation Ingest($input: IngestInput!) {\n  ingest(input: $input) {\n    documentId\n    title\n    chunkCount\n    status\n    message\n  }\n}",
+                "variables": "{\n  \"input\": {\n    \"title\": \"Docker Containerization Fundamentals\",\n    \"content\": \"Docker is a platform for developing, shipping, and running applications in containers. Containers are lightweight, standalone, executable packages that include everything needed to run an application. Docker images are read-only templates built from Dockerfiles. Containers are runnable instances of images. Docker Compose is a tool for defining and running multi-container applications using docker-compose.yml files. Volumes provide data persistence for containers. Networks enable container communication.\",\n    \"metadata\": {\n      \"category\": \"devops\",\n      \"tags\": [\"docker\", \"containers\", \"deployment\"]\n    }\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "mutation DeleteDocument($documentId: ID!) {\n  deleteDocument(documentId: $documentId) {\n    success\n    message\n  }\n}",
+                "variables": "{\n  \"documentId\": \"YOUR_DOCUMENT_ID_HERE\"\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Basic Search",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Search($query: String!, $limit: Int) {\n  search(query: $query, limit: $limit) {\n    results {\n      id\n      documentId\n      title\n      snippet\n      score\n      metadata {\n        category\n        tags\n      }\n    }\n    totalCount\n    query\n  }\n}",
+                "variables": "{\n  \"query\": \"What is a vector database?\",\n  \"limit\": 5\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search with Category Filter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Search($query: String!, $limit: Int, $filters: FilterInput) {\n  search(query: $query, limit: $limit, filters: $filters) {\n    results {\n      id\n      documentId\n      title\n      snippet\n      score\n      metadata {\n        category\n        tags\n      }\n    }\n    totalCount\n    query\n  }\n}",
+                "variables": "{\n  \"query\": \"How to create containers?\",\n  \"limit\": 5,\n  \"filters\": {\n    \"category\": \"devops\"\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search with Tags Filter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Search($query: String!, $limit: Int, $filters: FilterInput) {\n  search(query: $query, limit: $limit, filters: $filters) {\n    results {\n      id\n      documentId\n      title\n      snippet\n      score\n    }\n    totalCount\n    query\n  }\n}",
+                "variables": "{\n  \"query\": \"API documentation\",\n  \"limit\": 10,\n  \"filters\": {\n    \"tags\": [\"python\", \"api\"]\n  }\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Ask (RAG)",
+      "item": [
+        {
+          "name": "Ask about Qdrant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Ask($question: String!, $maxSources: Int) {\n  ask(question: $question, maxSources: $maxSources) {\n    answer\n    sources {\n      documentId\n      title\n      snippet\n      relevance\n    }\n    confidence\n    question\n  }\n}",
+                "variables": "{\n  \"question\": \"What is a Qdrant collection and how do I create one?\",\n  \"maxSources\": 3\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ask about FastAPI",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Ask($question: String!, $maxSources: Int) {\n  ask(question: $question, maxSources: $maxSources) {\n    answer\n    sources {\n      documentId\n      title\n      snippet\n      relevance\n    }\n    confidence\n    question\n  }\n}",
+                "variables": "{\n  \"question\": \"How do I use dependency injection in FastAPI?\",\n  \"maxSources\": 3\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ask about Docker",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Ask($question: String!, $maxSources: Int) {\n  ask(question: $question, maxSources: $maxSources) {\n    answer\n    sources {\n      documentId\n      title\n      snippet\n      relevance\n    }\n    confidence\n    question\n  }\n}",
+                "variables": "{\n  \"question\": \"What is the difference between a Docker image and a container?\",\n  \"maxSources\": 3\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ask Cross-Domain Question",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "graphql",
+              "graphql": {
+                "query": "query Ask($question: String!, $maxSources: Int) {\n  ask(question: $question, maxSources: $maxSources) {\n    answer\n    sources {\n      documentId\n      title\n      snippet\n      relevance\n    }\n    confidence\n    question\n  }\n}",
+                "variables": "{\n  \"question\": \"How can I deploy a FastAPI application using Docker?\",\n  \"maxSources\": 5\n}"
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/graphql",
+              "host": ["{{baseUrl}}"],
+              "path": ["graphql"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Python Service Direct",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/health",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Collection Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8000/api/collection/info",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "collection", "info"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
+
