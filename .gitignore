@@ -2,6 +2,10 @@
 .env
 *.env.local
 
+# Key-pair files
+vectorflowkp.pem
+vectorflowkp1.pem
+
 # Python
 __pycache__/
 *.py[cod]
