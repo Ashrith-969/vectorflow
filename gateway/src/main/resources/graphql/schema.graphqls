@@ -14,6 +14,12 @@ type Query {
 
     """List all users (requires ADMIN role)"""
     users: [User!]!
+
+    """List ingested documents with pagination (requires EDITOR or ADMIN role)"""
+    documents(page: Int = 1, pageSize: Int = 20): DocumentListResponse!
+
+    """Get a single document by ID with full chunk content (requires EDITOR or ADMIN role)"""
+    document(documentId: ID!): DocumentDetail
 }
 
 # ============== Mutations ==============
@@ -207,6 +213,54 @@ type AssignRoleResponse {
 type Metadata {
     category: String
     tags: [String!]
+}
+
+type DocumentInfo {
+    """Document ID (UUID)"""
+    documentId: ID!
+    """Document title"""
+    title: String!
+    """Number of chunks"""
+    chunkCount: Int!
+    """When the document was ingested"""
+    createdAt: String!
+    """Optional metadata"""
+    metadata: Metadata
+}
+
+type DocumentListResponse {
+    """List of documents for the current page"""
+    documents: [DocumentInfo!]!
+    """Total number of documents"""
+    totalCount: Int!
+    """Current page (1-based)"""
+    page: Int!
+    """Page size"""
+    pageSize: Int!
+}
+
+type DocumentChunk {
+    """Chunk ID"""
+    chunkId: ID!
+    """Index of chunk in document"""
+    chunkIndex: Int!
+    """Chunk text content"""
+    text: String!
+    """When the chunk was created"""
+    createdAt: String!
+    """Optional metadata"""
+    metadata: Metadata
+}
+
+type DocumentDetail {
+    """Document ID (UUID)"""
+    documentId: ID!
+    """Document title"""
+    title: String!
+    """All chunks (ordered)"""
+    chunks: [DocumentChunk!]!
+    """Total number of chunks"""
+    totalChunks: Int!
 }
 
 # ============== Enums ==============

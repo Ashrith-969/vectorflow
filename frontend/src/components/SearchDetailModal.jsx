@@ -1,6 +1,22 @@
-import { X, FileText, Tag } from 'lucide-react';
+import { useQuery } from '@apollo/client';
+import { DOCUMENT_DETAIL } from '../graphql/queries';
+import { X, FileText, Tag, Loader2 } from 'lucide-react';
 
 export default function SearchDetailModal({ result, onClose }) {
+  const { data, loading, error } = useQuery(DOCUMENT_DETAIL, {
+    variables: { documentId: result?.documentId },
+    skip: !result?.documentId,
+  });
+
+  const doc = data?.document;
+  const fullContent = doc?.chunks
+    ? [...doc.chunks]
+        .sort((a, b) => a.chunkIndex - b.chunkIndex)
+        .map((c) => c.text)
+        .join('\n\n')
+    : '';
+  const meta = doc?.chunks?.[0]?.metadata ?? result?.metadata;
+
   if (!result) return null;
 
   const pct = Math.round(result.score * 100);
@@ -43,22 +59,34 @@ export default function SearchDetailModal({ result, onClose }) {
 
           <div className="mb-5">
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Content</h3>
-            <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {result.snippet}
-            </div>
+            {loading && (
+              <div className="flex items-center justify-center py-12 bg-gray-50 rounded-xl">
+                <Loader2 size={24} className="animate-spin text-indigo-500" />
+              </div>
+            )}
+            {error && (
+              <div className="mb-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-800">
+                Could not load full document. Showing matched excerpt.
+              </div>
+            )}
+            {!loading && (
+              <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                {fullContent || result.snippet || 'No content.'}
+              </div>
+            )}
           </div>
 
-          {(result.metadata?.category || result.metadata?.tags?.length > 0) && (
+          {(meta?.category || meta?.tags?.length > 0) && (
             <div>
               <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Metadata</h3>
               <div className="flex flex-wrap gap-2">
-                {result.metadata.category && (
+                {meta.category && (
                   <span className="inline-flex items-center gap-1 text-xs bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full font-medium">
                     <FileText size={12} />
-                    {result.metadata.category}
+                    {meta.category}
                   </span>
                 )}
-                {result.metadata.tags?.map((tag, i) => (
+                {meta.tags?.map((tag, i) => (
                   <span key={i} className="inline-flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full font-medium">
                     <Tag size={12} />
                     {tag}

@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { MessageSquare, Search, Upload, Files, Users, LogOut, Zap } from 'lucide-react';
+import { MessageSquare, Search, Upload, Files, FileText, Users, LogOut, Zap } from 'lucide-react';
 import RoleBadge from './RoleBadge';
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { to: '/search', icon: Search, label: 'Search', roles: ['VIEWER', 'EDITOR', 'ADMIN'] },
   { to: '/ingest', icon: Upload, label: 'Ingest', roles: ['EDITOR', 'ADMIN'] },
   { to: '/bulk-ingest', icon: Files, label: 'Bulk Ingest', roles: ['EDITOR', 'ADMIN'] },
+  { to: '/documents', icon: FileText, label: 'Documents', roles: ['EDITOR', 'ADMIN'] },
   { to: '/admin', icon: Users, label: 'Users', roles: ['ADMIN'] },
 ];
 

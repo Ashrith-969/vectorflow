@@ -23,6 +23,10 @@ public interface VectorSearchService {
 
     DeleteResult deleteDocument(String documentId);
 
+    DocumentListResult listDocuments(int page, int pageSize);
+
+    DocumentDetailResult getDocument(String documentId);
+
     boolean healthCheck();
 
     // Response DTOs shared across implementations
@@ -78,5 +82,35 @@ public interface VectorSearchService {
             int successful,
             int failed,
             List<IngestResult> results
+    ) implements Serializable {}
+
+    record DocumentListItem(
+            String document_id,
+            String title,
+            int chunk_count,
+            String created_at,
+            Map<String, Object> metadata
+    ) implements Serializable {}
+
+    record DocumentListResult(
+            List<DocumentListItem> documents,
+            int total_count,
+            int page,
+            int page_size
+    ) implements Serializable {}
+
+    record DocumentChunkDto(
+            String chunk_id,
+            int chunk_index,
+            String text,
+            String created_at,
+            Map<String, Object> metadata
+    ) implements Serializable {}
+
+    record DocumentDetailResult(
+            String document_id,
+            String title,
+            List<DocumentChunkDto> chunks,
+            int total_chunks
     ) implements Serializable {}
 }

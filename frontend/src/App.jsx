@@ -7,6 +7,7 @@ import AskPage from './pages/AskPage';
 import SearchPage from './pages/SearchPage';
 import IngestPage from './pages/IngestPage';
 import BulkIngestPage from './pages/BulkIngestPage';
+import DocumentsPage from './pages/DocumentsPage';
 import AdminPage from './pages/AdminPage';
 
 function AppRoutes() {
@@ -31,6 +32,11 @@ function AppRoutes() {
       <Route path="/bulk-ingest" element={
         <ProtectedRoute roles={['EDITOR', 'ADMIN']}>
           <Layout><BulkIngestPage /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/documents" element={
+        <ProtectedRoute roles={['EDITOR', 'ADMIN']}>
+          <Layout><DocumentsPage /></Layout>
         </ProtectedRoute>
       } />
       <Route path="/admin" element={

@@ -122,6 +122,54 @@ public class QueryResolver {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * List ingested documents with pagination. Requires EDITOR or ADMIN.
+     */
+    @QueryMapping
+    public DocumentListResponse documents(
+            @Argument Integer page,
+            @Argument Integer pageSize
+    ) {
+        authGuard.requireAnyRole(Role.EDITOR, Role.ADMIN);
+        int p = page != null && page >= 1 ? page : 1;
+        int ps = pageSize != null && pageSize >= 1 && pageSize <= 100 ? pageSize : 20;
+        var result = vectorSearchService.listDocuments(p, ps);
+        List<DocumentInfoOutput> docs = result.documents().stream()
+                .map(d -> new DocumentInfoOutput(
+                        d.document_id(),
+                        d.title(),
+                        d.chunk_count(),
+                        d.created_at(),
+                        convertMetadata(d.metadata())
+                ))
+                .collect(Collectors.toList());
+        return new DocumentListResponse(docs, result.total_count(), result.page(), result.page_size());
+    }
+
+    /**
+     * Get a single document by ID with full chunk content. Requires EDITOR or ADMIN.
+     */
+    @QueryMapping
+    public DocumentDetailOutput document(@Argument String documentId) {
+        authGuard.requireAnyRole(Role.EDITOR, Role.ADMIN);
+        var result = vectorSearchService.getDocument(documentId);
+        List<DocumentChunkOutput> chunks = result.chunks().stream()
+                .map(c -> new DocumentChunkOutput(
+                        c.chunk_id(),
+                        c.chunk_index(),
+                        c.text(),
+                        c.created_at(),
+                        convertMetadata(c.metadata())
+                ))
+                .collect(Collectors.toList());
+        return new DocumentDetailOutput(
+                result.document_id(),
+                result.title(),
+                chunks,
+                result.total_chunks()
+        );
+    }
+
     // Helper method to convert metadata
     private MetadataOutput convertMetadata(Map<String, Object> metadata) {
         if (metadata == null) {
@@ -141,5 +189,9 @@ public class QueryResolver {
     public record AskResponse(String answer, List<SourceOutput> sources, Double confidence, String question) {}
     public record SourceOutput(String documentId, String title, String snippet, Double relevance) {}
     public record UserOutput(String id, String email, String role, String createdAt) {}
+    public record DocumentInfoOutput(String documentId, String title, int chunkCount, String createdAt, MetadataOutput metadata) {}
+    public record DocumentListResponse(List<DocumentInfoOutput> documents, int totalCount, int page, int pageSize) {}
+    public record DocumentChunkOutput(String chunkId, int chunkIndex, String text, String createdAt, MetadataOutput metadata) {}
+    public record DocumentDetailOutput(String documentId, String title, List<DocumentChunkOutput> chunks, int totalChunks) {}
 }
 

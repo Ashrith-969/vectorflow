@@ -101,6 +101,28 @@ public class PythonServiceClient implements VectorSearchService {
     }
 
     @Override
+    public VectorSearchService.DocumentListResult listDocuments(int page, int pageSize) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/documents")
+                        .queryParam("page", page)
+                        .queryParam("page_size", pageSize)
+                        .build())
+                .retrieve()
+                .bodyToMono(VectorSearchService.DocumentListResult.class)
+                .block();
+    }
+
+    @Override
+    public VectorSearchService.DocumentDetailResult getDocument(String documentId) {
+        return webClient.get()
+                .uri("/api/documents/{id}", documentId)
+                .retrieve()
+                .bodyToMono(VectorSearchService.DocumentDetailResult.class)
+                .block();
+    }
+
+    @Override
     public boolean healthCheck() {
         try {
             webClient.get()

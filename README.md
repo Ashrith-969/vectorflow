@@ -31,9 +31,10 @@ VectorFlow:
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
+| **Frontend** | React + Vite + Apollo Client | GraphQL UI, search, documents, bulk ingest |
 | **API Gateway** | Spring Boot + GraphQL | Unified API, JWT auth, caching |
 | **AI Service** | Python + FastAPI | Embeddings, RAG, LLM orchestration |
-| **Vector DB** | Qdrant | Similarity search, vector storage |
+| **Vector DB** | Qdrant | HNSW similarity search, vector storage |
 | **Relational DB** | PostgreSQL | Users, document metadata |
 | **Cache** | Redis | Search result caching |
 | **Containerization** | Docker Compose | Multi-service orchestration |
@@ -48,7 +49,7 @@ VectorFlow:
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                           CLIENT LAYER                                  │
-│                    (Postman / Frontend / Mobile)                        │
+│              React App (Port 3000) / Postman / Mobile                   │
 └────────────────────────────────┬────────────────────────────────────────┘
                                  │ GraphQL Requests
                                  ▼
@@ -82,9 +83,10 @@ VectorFlow:
 
 | Component | Responsibility |
 |-----------|---------------|
+| **Frontend** | React SPA for search, document list/detail, bulk ingest; talks to Gateway via GraphQL |
 | **Spring Boot Gateway** | API exposure, authentication, caching, request routing |
 | **Python Service** | AI/ML operations, document processing, vector operations |
-| **Qdrant** | Vector storage, similarity search with filtering |
+| **Qdrant** | Vector storage, HNSW-based similarity search with filtering |
 | **PostgreSQL** | User accounts, document metadata, audit trails |
 | **Redis** | Cache search results to reduce API calls and latency |
 | **OpenAI** | Generate embeddings (ada-002) and answers (GPT-3.5) |
@@ -177,12 +179,13 @@ When you ingest a document, here's what happens:
    └────────────────────────────────────────┘
                     │
                     ▼
-3. Cosine Similarity Search in Qdrant
+3. HNSW Similarity Search in Qdrant
    ┌────────────────────────────────────────┐
-   │  Compare query vector against all      │
-   │  stored vectors using:                 │
-   │                                        │
-   │  similarity = (A · B) / (|A| × |B|)   │
+   │  Qdrant uses the HNSW (Hierarchical    │
+   │  Navigable Small World) algorithm to   │
+   │  find nearest vectors. Similarity is   │
+   │  computed as cosine:                   │
+   │  (A · B) / (|A| × |B|)                 │
    │                                        │
    │  Score range: 0.0 (unrelated)         │
    │               to 1.0 (identical)       │
@@ -347,6 +350,7 @@ Wait for all services to be healthy (about 30-60 seconds).
 
 | Service | URL | Description |
 |---------|-----|-------------|
+| **Frontend** | http://localhost:3000 | React UI — search, documents, bulk ingest |
 | GraphQL API | http://localhost:8080/graphql | Main API endpoint |
 | GraphiQL UI | http://localhost:8080/graphiql | Interactive GraphQL IDE |
 | Python Docs | http://localhost:8000/docs | FastAPI Swagger UI |
@@ -396,6 +400,8 @@ mutation {
   }
 }
 ```
+
+**Roles:** `VIEWER` (search/ask only), `EDITOR` (+ ingest, documents, bulk ingest), `ADMIN` (+ users, assignRole). Use `assignRole` to promote users.
 
 ### Document Operations
 
@@ -478,7 +484,83 @@ query {
   me {
     id
     email
+    role
     createdAt
+  }
+}
+```
+
+**List Documents (paginated):**
+```graphql
+query {
+  documents(page: 1, pageSize: 20) {
+    documents {
+      documentId
+      title
+      chunkCount
+      createdAt
+      metadata { category tags }
+    }
+    totalCount
+    page
+    pageSize
+  }
+}
+```
+
+**Get Document Detail (with chunks):**
+```graphql
+query {
+  document(documentId: "uuid-here") {
+    documentId
+    title
+    totalChunks
+    chunks {
+      chunkId
+      chunkIndex
+      text
+      createdAt
+    }
+  }
+}
+```
+
+**Bulk Ingest:**
+```graphql
+mutation {
+  bulkIngest(input: {
+    documents: [
+      { title: "Doc 1", content: "Content 1...", metadata: { category: "tech" } }
+      { title: "Doc 2", content: "Content 2...", metadata: { tags: ["ai"] } }
+    ]
+  }) {
+    total
+    successful
+    failed
+    results { documentId title chunkCount status message }
+  }
+}
+```
+
+**List Users (ADMIN only):**
+```graphql
+query {
+  users {
+    id
+    email
+    role
+    createdAt
+  }
+}
+```
+
+**Assign Role (ADMIN only):**
+```graphql
+mutation {
+  assignRole(input: { userId: "user-uuid", role: "EDITOR" }) {
+    success
+    message
+    user { id email role }
   }
 }
 ```
@@ -493,6 +575,23 @@ vectorflow/
 ├── docker-compose.yml          # 🐳 Multi-container orchestration
 ├── env.sample                  # 📋 Environment variables template
 ├── README.md                   # 📖 This file
+│
+├── frontend/                   # ⚛️ React + Vite UI
+│   ├── Dockerfile              # Nginx serve of built assets
+│   ├── package.json            # React, Apollo Client, Tailwind, React Router
+│   ├── vite.config.js
+│   └── src/
+│       ├── App.jsx             # Routes and auth state
+│       ├── main.jsx
+│       ├── components/
+│       │   ├── Layout.jsx       # Nav and shell
+│       │   ├── SearchDetailModal.jsx
+│       │   └── DocumentDetailModal.jsx
+│       ├── pages/
+│       │   ├── DocumentsPage.jsx   # List documents, view detail
+│       │   └── BulkIngestPage.jsx  # Bulk ingest UI
+│       └── graphql/
+│           └── queries.js      # GraphQL operations
 │
 ├── gateway/                    # ☕ Spring Boot GraphQL API Gateway
 │   ├── Dockerfile
@@ -562,7 +661,7 @@ vectorflow/
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `OPENAI_API_KEY` | OpenAI API key for embeddings & LLM | - | ✅ Yes |
-| `POSTGRES_DB` | PostgreSQL database name | vectorflow | No |
+| `POSTGRES_DB` | PostgreSQL database name | vectorflow_sql_db | No |
 | `POSTGRES_USER` | PostgreSQL username | vectorflow | No |
 | `POSTGRES_PASSWORD` | PostgreSQL password | vectorflow123 | No |
 | `JWT_SECRET` | Secret for signing JWT tokens | auto-generated | No |
@@ -584,6 +683,14 @@ llm_model: str = "gpt-3.5-turbo"
 ## 🛠 Development
 
 ### Run Services Individually
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Runs at http://localhost:5173 (Vite). Set `VITE_GRAPHQL_URI` or use default `http://localhost:8080/graphql` for API.
 
 **Python Service:**
 ```bash
@@ -643,7 +750,7 @@ python scripts/bulk_ingest_data.py
 |----------|-----------|
 | **GraphQL over REST** | Flexible queries, strong typing, single endpoint, introspection |
 | **Microservices (Java + Python)** | Java for enterprise patterns (security, caching); Python for AI/ML ecosystem |
-| **Qdrant over Pinecone** | Open-source, self-hostable, excellent filtering, Rust performance |
+| **Qdrant over Pinecone** | Open-source, self-hostable, HNSW similarity search, excellent filtering, Rust performance |
 | **text-embedding-ada-002** | Best cost/quality ratio, 1536 dimensions, OpenAI reliability |
 | **500 token chunks** | Balance between context preservation and search precision |
 | **50 token overlap** | Prevents information loss at chunk boundaries |
@@ -699,7 +806,7 @@ curl http://localhost:8080/actuator/health
 ## 📊 Performance Considerations
 
 - **Embedding batch size**: OpenAI allows batching multiple texts in one API call
-- **Qdrant HNSW index**: Provides O(log n) search complexity
+- **Qdrant HNSW algorithm**: Similarity search uses Hierarchical Navigable Small World (HNSW), providing O(log n) approximate nearest-neighbor search
 - **Redis TTL**: Configure cache expiration based on data freshness needs
 - **Chunk size tuning**: Larger chunks = more context but lower precision
 - **Connection pooling**: WebClient reuses connections to Python service
@@ -731,4 +838,4 @@ MIT License - feel free to use this project for learning and building!
 
 ---
 
-**Built with ❤️ using Spring Boot, FastAPI, Qdrant, and OpenAI**
+**Built with ❤️ using React, Spring Boot, FastAPI, Qdrant, and OpenAI**
